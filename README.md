@@ -28,14 +28,15 @@ Then in the app's "🌐 เล่นออนไลน์" screen, leave the ser
 
 **Deploy it for real** (players on different networks — the actual "online" case):
 
-The server is a plain Node process (`server/index.ts`, `npm run server` as its start command) — any Node host works. The fastest free option:
+`render.yaml` in this repo is a one-click blueprint that deploys *both* the room server and a static build of the frontend, already wired together — you don't need to touch any URLs by hand.
 
-1. Push this repo to GitHub.
-2. Go to [render.com](https://render.com) → New → Blueprint → point it at your repo. It reads `render.yaml` in this project and sets everything up automatically (free tier, no credit card).
-3. Once deployed, copy the service URL Render gives you (`https://xxxx.onrender.com`) and turn it into a WebSocket URL: `wss://xxxx.onrender.com`.
-4. In the game's "ตั้งค่าเซิร์ฟเวอร์ (ขั้นสูง)" field on the online-entry screen, paste that `wss://…` URL. Or bake it in permanently by setting `VITE_WS_URL=wss://xxxx.onrender.com` in a `.env` file before running `npm run build`, so players never have to type it.
+1. Push this repo to a GitHub repo of yours.
+2. Go to [render.com](https://render.com) → sign in with GitHub → New → Blueprint → pick the repo. It reads `render.yaml` and creates two free services: `werewolf-online-server` (the room server) and `werewolf-frontend` (the game, pre-configured to talk to that server). No credit card needed.
+3. Once both finish deploying, open the `werewolf-frontend` service's URL — that's the real link to share with players. Each of them opens it on their own device.
 
-Render's free tier spins the service down after inactivity — the first connection after a while takes a few extra seconds to wake it up, that's normal.
+If Render says the `werewolf-online-server` name is taken (shared namespace across all Render users), rename it in `render.yaml` in both places it appears (the service `name:` and the `VITE_WS_URL` value) to something more unique before deploying.
+
+Render's free tier spins services down after inactivity — the first connection after a while takes a few extra seconds to wake back up, that's normal.
 
 ## Architecture
 

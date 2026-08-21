@@ -8,3 +8,20 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 20
+
+  - type: web
+    name: werewolf-frontend
+    runtime: static
+    plan: free
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      # Render assigns https://<name>.onrender.com predictably from the
+      # `name:` above, so this can be set directly instead of needing to
+      # look the backend's URL up after the fact.
+      - key: VITE_WS_URL
+        value: wss://werewolf-online-server.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
