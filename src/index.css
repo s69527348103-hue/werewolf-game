@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Kanit", "Noto Sans Thai", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Noto Sans Thai", "Kanit", ui-sans-serif, system-ui, sans-serif;
+
+  --color-night-950: #05070f;
+  --color-night-900: #0a0e1a;
+  --color-night-800: #121a2e;
+  --color-night-700: #1c2740;
+  --color-night-600: #2a3757;
+  --color-night-500: #3d4d78;
+
+  --color-day-950: #2a1c10;
+  --color-day-900: #3d2a17;
+  --color-day-800: #5c4023;
+  --color-day-700: #7a5730;
+  --color-day-500: #b9895a;
+  --color-day-300: #e8c9a0;
+  --color-day-100: #f5e6cc;
+
+  --color-werewolf: #dc3b3b;
+  --color-werewolf-dim: #7a1f1f;
+  --color-doctor: #33a373;
+  --color-doctor-dim: #1c5940;
+  --color-seer: #9b5de5;
+  --color-seer-dim: #4f2c7a;
+  --color-villagerRole: #3b8fdc;
+  --color-villagerRole-dim: #1f4a7a;
+
+  --color-gold: #d4af37;
+  --color-parchment: #f5e6cc;
+
+  --animate-fade-in: fade-in 0.5s ease-out;
+  --animate-rise: rise 0.6s ease-out;
+  --animate-pulse-slow: pulse-slow 2.4s ease-in-out infinite;
+  --animate-flicker: flicker 3s ease-in-out infinite;
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+  }
+  @keyframes flicker {
+    0%, 100% { opacity: 1; }
+    45% { opacity: 0.85; }
+    50% { opacity: 0.6; }
+    55% { opacity: 0.9; }
+  }
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-night-950);
+  color: var(--color-parchment);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-night-600);
+  border-radius: 999px;
+}
+
+.bg-stars {
+  background-image: radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.5) 0, transparent 100%),
+    radial-gradient(1px 1px at 70% 20%, rgba(255,255,255,0.4) 0, transparent 100%),
+    radial-gradient(1.5px 1.5px at 40% 70%, rgba(255,255,255,0.35) 0, transparent 100%),
+    radial-gradient(1px 1px at 85% 60%, rgba(255,255,255,0.45) 0, transparent 100%),
+    radial-gradient(1.5px 1.5px at 10% 85%, rgba(255,255,255,0.3) 0, transparent 100%),
+    radial-gradient(1px 1px at 60% 90%, rgba(255,255,255,0.4) 0, transparent 100%);
+}
