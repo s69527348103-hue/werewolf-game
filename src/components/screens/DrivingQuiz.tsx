@@ -4,6 +4,7 @@ import { Scene } from '../ui/Scene';
 import { Button } from '../ui/Button';
 import { useSound } from '../../hooks/useSound';
 import { useThaiSpeech } from '../../hooks/useThaiSpeech';
+import { useWrongQuestions } from '../../hooks/useWrongQuestions';
 import { CHOICE_LABELS, drivingQuizQuestions, shuffleArray, type QuizQuestion } from '../../data/drivingQuiz';
 
 type Phase = 'start' | 'quiz' | 'result';
@@ -32,10 +33,12 @@ export function DrivingQuiz() {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [showReview, setShowReview] = useState(false);
   const [confirmExit, setConfirmExit] = useState(false);
+  const [wrongOnlyMode, setWrongOnlyMode] = useState(false);
   const resultSpokenRef = useRef(false);
 
   const { play } = useSound();
   const speech = useThaiSpeech();
+  const wrongQ = useWrongQuestions();
 
   useEffect(() => {
     document.title = 'ข้อสอบใบขับขี่รถยนต์ พร้อมเฉลย | Werewolf';
@@ -72,17 +75,27 @@ export function DrivingQuiz() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
-  function startQuiz() {
-    const pool = shuffleOn ? shuffleArray(drivingQuizQuestions) : drivingQuizQuestions;
-    const picked = pool.slice(0, quizSize);
+  function beginQuiz(picked: QuizQuestion[], reviewMode: boolean) {
     setQuestions(picked);
     setCurrentIndex(0);
     setAnswers([]);
     setSelectedIndex(null);
     setShowReview(false);
+    setWrongOnlyMode(reviewMode);
     resultSpokenRef.current = false;
     play('phaseDay');
     setPhase('quiz');
+  }
+
+  function startQuiz() {
+    const pool = shuffleOn ? shuffleArray(drivingQuizQuestions) : drivingQuizQuestions;
+    beginQuiz(pool.slice(0, quizSize), false);
+  }
+
+  function startWrongOnlyQuiz() {
+    const pool = drivingQuizQuestions.filter((q) => wrongQ.wrongIds.includes(q.id));
+    if (pool.length === 0) return;
+    beginQuiz(shuffleArray(pool), true);
   }
 
   function selectChoice(i: number) {
@@ -90,6 +103,8 @@ export function DrivingQuiz() {
     setSelectedIndex(i);
     setAnswers((prev) => [...prev, { questionId: current.id, selectedIndex: i }]);
     const isCorrect = i === current.correctIndex;
+    if (isCorrect) wrongQ.markCorrect(current.id);
+    else wrongQ.markWrong(current.id);
     play(isCorrect ? 'reveal' : 'eliminate');
     const correctLabel = CHOICE_LABELS[current.correctIndex];
     speech.speak(isCorrect ? 'ถูกต้องครับ' : `ไม่ถูกต้อง เฉลยคือข้อ ${correctLabel}. ${current.choices[current.correctIndex]}`);
@@ -152,6 +167,9 @@ export function DrivingQuiz() {
               setShuffleOn={setShuffleOn}
               speechSupported={speech.supported}
               onStart={startQuiz}
+              wrongCount={wrongQ.wrongIds.length}
+              onStartWrongOnly={startWrongOnlyQuiz}
+              onClearWrong={wrongQ.clear}
             />
           )}
 
@@ -168,6 +186,7 @@ export function DrivingQuiz() {
               onReplay={() => readQuestion(current, currentIndex)}
               onExit={() => setConfirmExit(true)}
               speaking={speech.speaking}
+              wrongOnlyMode={wrongOnlyMode}
             />
           )}
 
@@ -181,6 +200,8 @@ export function DrivingQuiz() {
               showReview={showReview}
               setShowReview={setShowReview}
               onRestart={restart}
+              wrongOnlyMode={wrongOnlyMode}
+              remainingWrongCount={wrongQ.wrongIds.length}
             />
           )}
         </AnimatePresence>
@@ -228,6 +249,9 @@ function StartScreen({
   setShuffleOn,
   speechSupported,
   onStart,
+  wrongCount,
+  onStartWrongOnly,
+  onClearWrong,
 }: {
   quizSize: number;
   setQuizSize: (n: number) => void;
@@ -235,6 +259,9 @@ function StartScreen({
   setShuffleOn: (b: boolean) => void;
   speechSupported: boolean;
   onStart: () => void;
+  wrongCount: number;
+  onStartWrongOnly: () => void;
+  onClearWrong: () => void;
 }) {
   return (
     <motion.div
@@ -274,12 +301,9 @@ function StartScreen({
           ))}
         </div>
 
-        <label className="flex items-center justify-between cursor-pointer select-none">
+        <label className="flex items-center justify-between cursor-pointer select-none" onClick={() => setShuffleOn(!shuffleOn)}>
           <span className="text-parchment/80 text-sm">🔀 สุ่มลำดับข้อสอบ</span>
-          <span
-            onClick={() => setShuffleOn(!shuffleOn)}
-            className={`relative w-11 h-6 rounded-full transition-colors ${shuffleOn ? 'bg-gold' : 'bg-night-600'}`}
-          >
+          <span className={`relative w-11 h-6 rounded-full transition-colors ${shuffleOn ? 'bg-gold' : 'bg-night-600'}`}>
             <span
               className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
                 shuffleOn ? 'translate-x-5' : 'translate-x-0.5'
@@ -298,6 +322,24 @@ function StartScreen({
       <Button onClick={onStart} className="w-full max-w-xs mx-auto text-lg">
         ▶ เริ่มทำข้อสอบ
       </Button>
+
+      <div className="mt-6 pt-6 border-t border-night-600/60 flex flex-col items-center gap-2">
+        <Button
+          variant="secondary"
+          onClick={onStartWrongOnly}
+          disabled={wrongCount === 0}
+          className="w-full max-w-xs mx-auto"
+        >
+          🎯 ฝึกเฉพาะข้อที่เคยตอบผิด ({wrongCount} ข้อ)
+        </Button>
+        {wrongCount === 0 ? (
+          <p className="text-xs text-parchment/35">ยังไม่มีข้อที่เคยตอบผิดสะสมไว้ — ลองทำข้อสอบก่อนนะ</p>
+        ) : (
+          <button onClick={onClearWrong} className="text-xs text-parchment/40 hover:text-parchment/70 underline underline-offset-2 transition-colors">
+            ล้างประวัติข้อที่เคยตอบผิด
+          </button>
+        )}
+      </div>
     </motion.div>
   );
 }
@@ -313,6 +355,7 @@ function QuizScreen({
   onReplay,
   onExit,
   speaking,
+  wrongOnlyMode,
 }: {
   index: number;
   total: number;
@@ -324,6 +367,7 @@ function QuizScreen({
   onReplay: () => void;
   onExit: () => void;
   speaking: boolean;
+  wrongOnlyMode: boolean;
 }) {
   const answered = selectedIndex !== null;
   const isCorrect = answered && selectedIndex === question.correctIndex;
@@ -337,6 +381,11 @@ function QuizScreen({
       transition={{ duration: 0.35 }}
       className="w-full max-w-2xl"
     >
+      {wrongOnlyMode && (
+        <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-gold/15 border border-gold/30 text-gold text-xs px-3 py-1">
+          🎯 โหมดฝึกข้อที่เคยตอบผิด
+        </div>
+      )}
       <div className="flex items-center justify-between mb-2 text-sm text-parchment/60">
         <span>
           ข้อที่ {index + 1} / {total}
@@ -447,6 +496,8 @@ function ResultScreen({
   showReview,
   setShowReview,
   onRestart,
+  wrongOnlyMode,
+  remainingWrongCount,
 }: {
   questions: QuizQuestion[];
   answers: Answer[];
@@ -455,6 +506,8 @@ function ResultScreen({
   showReview: boolean;
   setShowReview: (b: boolean) => void;
   onRestart: () => void;
+  wrongOnlyMode: boolean;
+  remainingWrongCount: number;
 }) {
   const pct = total > 0 ? Math.round((correctCount / total) * 100) : 0;
   const { emoji, text } = scoreMessage(pct);
@@ -488,6 +541,13 @@ function ResultScreen({
         <p className="text-parchment/70">
           ตอบถูก {correctCount} จาก {total} ข้อ
         </p>
+        {wrongOnlyMode && (
+          <p className="text-sm text-parchment/50 mt-2">
+            {remainingWrongCount === 0
+              ? '🎉 ทบทวนครบแล้ว ไม่มีข้อที่ยังตอบผิดค้างอยู่'
+              : `ยังเหลือ ${remainingWrongCount} ข้อที่ต้องฝึกต่อ`}
+          </p>
+        )}
       </motion.div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
