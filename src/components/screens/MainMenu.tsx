@@ -50,7 +50,16 @@ export function MainMenu({ onNewGame, onPlayOnline, onHowToPlay }: MainMenuProps
             📖 วิธีเล่น
           </Button>
         </motion.div>
-        <p className="text-xs text-parchment/30 mt-14">รองรับผู้เล่น 6–12 คน · เล่นแบบส่งต่ออุปกรณ์เครื่องเดียว</p>
+        <motion.a
+          href="/quiz"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mt-8 text-sm text-parchment/50 hover:text-gold underline underline-offset-4 transition-colors"
+        >
+          🚗📝 ข้อสอบใบขับขี่รถยนต์ พร้อมเฉลยและเสียงไทย
+        </motion.a>
+        <p className="text-xs text-parchment/30 mt-6">รองรับผู้เล่น 6–12 คน · เล่นแบบส่งต่ออุปกรณ์เครื่องเดียว</p>
         <p className="text-[11px] text-parchment/25 mt-2">สร้างโดย storyman</p>
       </div>
     </Scene>
