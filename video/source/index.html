@@ -1,0 +1,234 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:K;font-weight:400;src:url(fonts/kanit-thai-400-normal.woff2);unicode-range:U+0E01-0E5B,U+200C-200D,U+25CC}
+@font-face{font-family:K;font-weight:400;src:url(fonts/kanit-latin-400-normal.woff2);unicode-range:U+0000-00FF,U+2000-206F}
+@font-face{font-family:K;font-weight:700;src:url(fonts/kanit-thai-700-normal.woff2);unicode-range:U+0E01-0E5B,U+200C-200D,U+25CC}
+@font-face{font-family:K;font-weight:700;src:url(fonts/kanit-latin-700-normal.woff2);unicode-range:U+0000-00FF,U+2000-206F}
+@font-face{font-family:K;font-weight:900;src:url(fonts/kanit-thai-900-normal.woff2);unicode-range:U+0E01-0E5B,U+200C-200D,U+25CC}
+@font-face{font-family:K;font-weight:900;src:url(fonts/kanit-latin-900-normal.woff2);unicode-range:U+0000-00FF,U+2000-206F}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;background:#000;overflow:hidden;font-family:K,sans-serif;color:#fff}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:#000}
+.abs{position:absolute}
+.full{position:absolute;inset:0}
+:root{--red:#e60012;--blue:#38c8ff}
+
+/* ---------- shared keyframes ---------- */
+@keyframes show{0%{opacity:0}4%{opacity:1}96%{opacity:1}100%{opacity:0}}
+@keyframes showIn{0%{opacity:0}6%{opacity:1}100%{opacity:1}}
+@keyframes up{from{opacity:0;transform:translateY(90px) skewX(-8deg);filter:blur(14px)}to{opacity:1;transform:none skewX(-8deg);filter:blur(0)}}
+@keyframes slideL{from{opacity:0;transform:translateX(-700px) skewX(-8deg)}70%{opacity:1;transform:translateX(30px) skewX(-8deg)}to{opacity:1;transform:translateX(0) skewX(-8deg)}}
+@keyframes slideR{from{opacity:0;transform:translateX(700px) skewX(-8deg)}70%{opacity:1;transform:translateX(-30px) skewX(-8deg)}to{opacity:1;transform:translateX(0) skewX(-8deg)}}
+@keyframes pop{0%{opacity:0;transform:scale(3) skewX(-8deg);filter:blur(20px)}60%{opacity:1;transform:scale(.92) skewX(-8deg);filter:blur(0)}80%{transform:scale(1.05) skewX(-8deg)}100%{opacity:1;transform:scale(1) skewX(-8deg)}}
+@keyframes wipe{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes lineGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes flash{0%{opacity:0}15%{opacity:1}100%{opacity:0}}
+@keyframes sweep{from{transform:translateX(-1600px) rotate(20deg)}to{transform:translateX(1800px) rotate(20deg)}}
+@keyframes pulse{0%,100%{transform:scale(1) skewX(-8deg);text-shadow:0 0 30px rgba(230,0,18,.8),0 0 0 #fff}50%{transform:scale(1.08) skewX(-8deg);text-shadow:0 0 70px rgba(255,40,60,1),0 0 20px #fff}}
+@keyframes floatUp{from{transform:translateY(0)}to{transform:translateY(-2200px)}}
+@keyframes speed{from{transform:translateX(1300px)}to{transform:translateX(-1500px)}}
+@keyframes spin{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+
+/* ---------- particles / overlays ---------- */
+.p{position:absolute;border-radius:50%;background:#fff;animation:floatUp linear infinite}
+.sl{position:absolute;height:3px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.9),transparent);animation:speed linear infinite}
+#flashes .f{position:absolute;inset:0;background:#fff;opacity:0;animation:flash 450ms ease-out both}
+.vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,.85) 100%);pointer-events:none}
+.scan{position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 2px,transparent 2px 5px);mix-blend-mode:overlay}
+
+/* ---------- INTRO ---------- */
+#intro{animation:show 3150ms linear 0ms both;background:radial-gradient(circle at 50% 46%,#3a0006 0%,#120002 35%,#000 70%)}
+#intro .ring{left:540px;top:830px;width:760px;height:760px;border-radius:50%;border:3px solid rgba(255,255,255,.12);border-top-color:rgba(255,40,60,.9);border-right-color:rgba(255,40,60,.3);animation:spin 2400ms linear 0ms infinite}
+#intro .ring2{width:900px;height:900px;border-width:2px;border-top-color:transparent;border-bottom-color:rgba(56,200,255,.7);animation-duration:3600ms;animation-direction:reverse}
+#intro .hline{left:0;top:830px;width:1080px;height:4px;background:linear-gradient(90deg,transparent,#fff 30%,#ff2a3a 50%,#fff 70%,transparent);box-shadow:0 0 30px #ff2a3a,0 0 80px #ff2a3a;transform-origin:center;animation:lineGrow 600ms cubic-bezier(.2,.8,.2,1) 100ms both, introLineOut 400ms ease-in 700ms forwards}
+@keyframes introLineOut{to{opacity:0;transform:scaleX(1) scaleY(30)}}
+#logoWrap{left:540px;top:830px;width:560px;height:395px;margin:-197px 0 0 -280px;animation:logoIn 1100ms cubic-bezier(.16,1,.3,1) 450ms both, logoOut 450ms cubic-bezier(.7,0,.84,0) 2700ms forwards}
+@keyframes logoIn{0%{opacity:0;transform:scale(3.2);filter:blur(30px) drop-shadow(0 0 0 #f00)}55%{opacity:1;filter:blur(0) drop-shadow(0 0 60px rgba(255,30,50,.9))}100%{opacity:1;transform:scale(1);filter:blur(0) drop-shadow(0 0 40px rgba(255,30,50,.7))}}
+@keyframes logoOut{to{transform:scale(9);opacity:0;filter:blur(8px)}}
+#logoWrap img{width:100%;height:100%;display:block}
+#logoWrap .shine{position:absolute;inset:0;-webkit-mask-image:url(logo.png);-webkit-mask-size:100% 100%;overflow:hidden}
+#logoWrap .shine i{position:absolute;top:-200px;left:0;width:140px;height:800px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0),rgba(255,120,130,1),rgba(255,255,255,0),transparent);animation:sweepLogo 700ms ease-in-out 1300ms both}
+@keyframes sweepLogo{from{transform:translateX(-300px) rotate(20deg)}to{transform:translateX(800px) rotate(20deg)}}
+#brand{left:0;width:1080px;top:1140px;text-align:center;animation:logoOut2 400ms ease-in 2700ms forwards}
+@keyframes logoOut2{to{opacity:0;transform:translateY(-40px);filter:blur(10px)}}
+#brand .word{display:inline-block;font-weight:900;font-size:128px;line-height:1;letter-spacing:6px}
+#brand .word span{display:inline-block;animation:letter 600ms cubic-bezier(.16,1,.3,1) both}
+@keyframes letter{from{opacity:0;transform:translateY(-140px) scale(1.6);filter:blur(12px)}to{opacity:1;transform:none;filter:blur(0)}}
+#brand .w2{margin-left:24px}
+#brand .w2 span{color:var(--red);text-shadow:0 0 40px rgba(255,0,30,.8)}
+#brand .w1 span{text-shadow:0 0 30px rgba(255,255,255,.5)}
+#brand .tag{margin-top:26px;font-size:34px;letter-spacing:18px;font-weight:400;color:#ddd;animation:showIn 500ms linear 2050ms both, wipe 700ms cubic-bezier(.2,.8,.2,1) 2050ms both}
+#brand .bar{margin:22px auto 0;width:520px;height:5px;background:linear-gradient(90deg,transparent,var(--red),transparent);animation:lineGrow 600ms ease-out 1900ms both}
+
+/* ---------- CAR SCENES ---------- */
+.scene{opacity:0}
+.bgblur{position:absolute;left:-200px;top:-200px;width:1480px;height:2320px;background:url(poster.jpg) center/cover;filter:blur(40px) brightness(.35) saturate(1.3)}
+.shot{position:absolute;left:0;width:1080px;overflow:hidden;box-shadow:0 0 0 2px rgba(255,255,255,.08)}
+.shot img{position:absolute;left:0;top:0;width:554px;transform-origin:0 0;filter:contrast(1.08) saturate(1.15)}
+.shot::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.55),transparent 22%,transparent 78%,rgba(0,0,0,.6))}
+.redbar{position:absolute;height:14px;background:var(--red);box-shadow:0 0 30px var(--red)}
+.big{font-weight:900;line-height:.95;transform:skewX(-8deg)}
+.thai{font-weight:900;line-height:1.15}
+.chip{display:inline-block;background:var(--red);padding:6px 28px;font-weight:900;transform:skewX(-12deg)}
+.glow{text-shadow:0 0 30px rgba(0,0,0,.9),0 4px 0 rgba(0,0,0,.5)}
+.blue{color:var(--blue);text-shadow:0 0 30px rgba(56,200,255,.9)}
+
+#s1{animation:show 2650ms linear 2950ms both}
+#s1 .shot{top:560px;height:860px}
+#s1 .shot img{animation:k1 2650ms cubic-bezier(.2,.7,.3,1) 2950ms both}
+@keyframes k1{from{transform:translate(-430px,-1010px) scale(3.6)}to{transform:translate(-250px,-810px) scale(3.1)}}
+
+#s2{animation:show 2450ms linear 5550ms both}
+#s2 .shot{top:600px;height:760px}
+#s2 .shot img{animation:k2 2450ms cubic-bezier(.2,.7,.3,1) 5550ms both}
+@keyframes k2{from{transform:translate(-141px,-853px) scale(4.6)}to{transform:translate(-37px,-665px) scale(3.9)}}
+
+#s3{animation:show 2450ms linear 7950ms both}
+#s3 .shot{top:600px;height:760px}
+#s3 .shot img{animation:k3 2450ms cubic-bezier(.2,.7,.3,1) 7950ms both}
+@keyframes k3{from{transform:translate(-1223px,-790px) scale(4.3)}to{transform:translate(-1387px,-898px) scale(4.7)}}
+
+#s4{animation:show 2650ms linear 10350ms both}
+#s4 .shot{top:520px;height:1080px}
+#s4 .shot img{animation:k4 2650ms ease-out 10350ms both}
+@keyframes k4{from{transform:translate(-97px,-97px) scale(2.3)}to{transform:translate(0px,0px) scale(1.95)}}
+
+/* ---------- OUTRO ---------- */
+#outro{animation:showIn 2000ms linear 12950ms both;background:radial-gradient(circle at 50% 38%,#3a0006 0%,#110002 40%,#000 75%)}
+#oLogo{left:540px;top:500px;width:340px;height:240px;margin:-120px 0 0 -170px;animation:oLogo 900ms cubic-bezier(.16,1,.3,1) 13050ms both}
+@keyframes oLogo{from{opacity:0;transform:scale(.3) rotateY(180deg);filter:blur(10px)}to{opacity:1;transform:none;filter:drop-shadow(0 0 40px rgba(255,30,50,.7))}}
+#oLogo img{width:100%;height:100%}
+</style></head>
+<body><div id="stage">
+
+<!-- INTRO -->
+<div id="intro" class="full">
+  <div class="particles full" id="pIntro"></div>
+  <div class="abs ring" style="transform:translate(-50%,-50%)"></div>
+  <div class="abs ring ring2" style="transform:translate(-50%,-50%)"></div>
+  <div class="abs hline"></div>
+  <div id="logoWrap" class="abs"><img src="logo.png"><div class="shine"><i></i></div></div>
+  <div id="brand" class="abs">
+    <div><span class="word w1" id="w1"></span>&nbsp;<span class="word w2" id="w2"></span></div>
+    <div class="bar"></div>
+    <div class="tag">NEW CITY e:HEV RS</div>
+  </div>
+  <div class="vignette"></div>
+</div>
+
+<!-- S1: white sedan -->
+<div id="s1" class="full scene">
+  <div class="bgblur"></div>
+  <div class="speedlines full" data-n="18"></div>
+  <div class="shot"><img src="poster_hd.jpg"></div>
+  <div class="abs" style="left:70px;top:200px">
+    <div class="big glow" style="font-size:54px;letter-spacing:10px;color:#ddd;animation:up 500ms cubic-bezier(.16,1,.3,1) 3150ms both">NEW</div>
+    <div class="big glow" style="font-size:150px;animation:slideL 650ms cubic-bezier(.16,1,.3,1) 3250ms both">CITY <span class="blue">e:HEV</span></div>
+  </div>
+  <div class="redbar" style="left:0;top:540px;width:760px;transform-origin:left;animation:lineGrow 500ms ease-out 3350ms both"></div>
+  <div class="abs" style="right:70px;top:1480px;text-align:right">
+    <div class="thai glow" style="font-size:150px;animation:pop 700ms cubic-bezier(.16,1,.3,1) 3700ms both">รุ่น <span style="color:var(--red);text-shadow:0 0 40px rgba(255,0,30,.9)">RS</span></div>
+    <div class="thai glow" style="font-size:52px;font-weight:700;color:#ddd;animation:up 500ms ease-out 4100ms both">สปอร์ตเต็มพิกัด ไฮบริดเต็มประสิทธิภาพ</div>
+  </div>
+  <div class="vignette"></div><div class="scan"></div>
+</div>
+
+<!-- S2: silver hatchback -->
+<div id="s2" class="full scene">
+  <div class="bgblur" style="filter:blur(40px) brightness(.3) hue-rotate(180deg)"></div>
+  <div class="speedlines full" data-n="18"></div>
+  <div class="shot"><img src="poster_hd.jpg"></div>
+  <div class="abs" style="right:70px;top:220px;text-align:right">
+    <div class="big glow" style="font-size:130px;animation:slideR 650ms cubic-bezier(.16,1,.3,1) 5700ms both">CITY</div>
+    <div class="big glow" style="font-size:104px;animation:slideR 650ms cubic-bezier(.16,1,.3,1) 5820ms both">HATCHBACK</div>
+    <div class="big blue" style="font-size:90px;animation:slideR 650ms cubic-bezier(.16,1,.3,1) 5940ms both">e:HEV</div>
+  </div>
+  <div class="redbar" style="right:0;top:1400px;width:640px;transform-origin:right;animation:lineGrow 500ms ease-out 6100ms both"></div>
+  <div class="abs" style="left:70px;top:1460px">
+    <div class="chip" style="font-size:64px;animation:pop 600ms cubic-bezier(.16,1,.3,1) 6300ms both">RS</div>
+    <div class="thai glow" style="font-size:76px;margin-top:20px;animation:up 500ms ease-out 6550ms both">ดีไซน์สปอร์ต คล่องตัว</div>
+  </div>
+  <div class="vignette"></div><div class="scan"></div>
+</div>
+
+<!-- S3: black sedan -->
+<div id="s3" class="full scene">
+  <div class="bgblur" style="filter:blur(40px) brightness(.25) saturate(0)"></div>
+  <div class="speedlines full" data-n="18"></div>
+  <div class="shot"><img src="poster_hd.jpg"></div>
+  <div class="abs" style="left:0;width:1080px;top:190px;text-align:center">
+    <div class="thai glow" style="font-size:170px;color:var(--red);text-shadow:0 0 50px rgba(255,0,30,.9),0 6px 0 #000;animation:pop 700ms cubic-bezier(.16,1,.3,1) 8100ms both">พร้อมรับ!</div>
+  </div>
+  <div class="abs" style="left:0;width:1080px;top:1430px;text-align:center">
+    <div class="thai glow" style="font-size:180px;animation:up 600ms cubic-bezier(.16,1,.3,1) 8450ms both">ทุกสี</div>
+    <div id="swatches" style="display:flex;gap:30px;justify-content:center;margin-top:20px"></div>
+  </div>
+  <div class="vignette"></div><div class="scan"></div>
+</div>
+
+<!-- S4: full poster -->
+<div id="s4" class="full scene">
+  <div class="bgblur"></div>
+  <div class="particles full" id="pS4"></div>
+  <div class="shot" style="box-shadow:0 0 80px rgba(230,0,18,.5)"><img src="poster_hd.jpg"></div>
+  <div class="abs" style="left:0;width:1080px;top:150px;text-align:center">
+    <div class="thai" style="font-size:190px;color:#fff;animation:pop 700ms cubic-bezier(.16,1,.3,1) 10500ms both, pulse 700ms ease-in-out 11200ms 3">จองเลย!</div>
+  </div>
+  <div class="abs" style="left:0;width:1080px;top:1640px;text-align:center">
+    <div class="thai glow" style="font-size:66px;animation:up 500ms ease-out 10900ms both">ที่ <span style="color:var(--red)">TAK HONDA CARS</span></div>
+    <div class="thai" style="font-size:44px;font-weight:400;color:#ddd;animation:up 500ms ease-out 11150ms both">ทั้ง 2 สาขา ( สาขาตาก , สาขาแม่สอด )</div>
+  </div>
+  <div class="vignette"></div>
+</div>
+
+<!-- OUTRO -->
+<div id="outro" class="full scene">
+  <div class="particles full" id="pOut"></div>
+  <div id="oLogo" class="abs"><img src="logo.png"></div>
+  <div class="abs" style="left:0;width:1080px;top:680px;text-align:center">
+    <div style="font-weight:900;font-size:120px;line-height:1;animation:up 600ms cubic-bezier(.16,1,.3,1) 13350ms both">HONDA <span style="color:var(--red);text-shadow:0 0 40px rgba(255,0,30,.8)">MESSOT</span></div>
+    <div style="margin:30px auto;width:640px;height:4px;background:linear-gradient(90deg,transparent,var(--red),transparent);animation:lineGrow 500ms ease-out 13550ms both"></div>
+  </div>
+  <div class="abs" style="left:110px;width:860px;top:900px">
+    <div class="ci" style="animation:slideL 550ms cubic-bezier(.16,1,.3,1) 13650ms both"><b>☎</b><div><div class="cv">055-516-666</div><div class="cl">สาขาตาก</div></div></div>
+    <div class="ci" style="animation:slideL 550ms cubic-bezier(.16,1,.3,1) 13750ms both"><b>☎</b><div><div class="cv">055-531-111</div><div class="cl">สาขาแม่สอด</div></div></div>
+    <div class="ci" style="animation:slideL 550ms cubic-bezier(.16,1,.3,1) 13850ms both"><b>f</b><div><div class="cv">TAK HONDA CARS</div><div class="cl">Facebook</div></div></div>
+    <div class="ci" style="animation:slideL 550ms cubic-bezier(.16,1,.3,1) 13950ms both"><b>♪</b><div><div class="cv">TakHondaCars999</div><div class="cl">TikTok</div></div></div>
+    <div class="ci" style="animation:slideL 550ms cubic-bezier(.16,1,.3,1) 14050ms both"><b style="font-size:30px">LINE</b><div><div class="cv">@TAKHONDACAR</div><div class="cl">LINE Official</div></div></div>
+  </div>
+  <div class="vignette"></div>
+</div>
+<style>
+.ci{display:flex;align-items:center;gap:34px;margin-bottom:34px;padding:18px 30px;background:linear-gradient(90deg,rgba(230,0,18,.25),rgba(255,255,255,.04));border-left:8px solid var(--red)}
+.ci b{width:96px;height:96px;flex:none;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:52px;font-weight:900;box-shadow:0 0 30px rgba(230,0,18,.7)}
+.ci .cv{font-size:62px;font-weight:700;line-height:1.1;transform:skewX(8deg)}
+.ci .cl{font-size:36px;color:#bbb;transform:skewX(8deg)}
+</style>
+
+<div id="sweeps" class="full" style="pointer-events:none;overflow:hidden"></div>
+<div id="flashes" class="full" style="pointer-events:none"></div>
+</div>
+
+<script>
+let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return (seed-1)/2147483646};
+// letters
+function letters(id,txt,start){const el=document.getElementById(id);[...txt].forEach((c,i)=>{const s=document.createElement('span');s.textContent=c;s.style.animationDelay=(start+i*70)+'ms';el.appendChild(s)})}
+letters('w1','HONDA',1250);letters('w2','MESSOT',1600);
+// particles
+function particles(id,n,colors){const el=document.getElementById(id);for(let i=0;i<n;i++){const p=document.createElement('div');p.className='p';const s=2+rnd()*7;p.style.cssText=`left:${rnd()*1080}px;top:${1920+rnd()*2200-1100}px;width:${s}px;height:${s}px;opacity:${.3+rnd()*.7};background:${colors[i%colors.length]};box-shadow:0 0 ${s*3}px ${colors[i%colors.length]};animation-duration:${5000+rnd()*7000}ms;animation-delay:${-rnd()*8000}ms`;el.appendChild(p)}}
+particles('pIntro',90,['#fff','#ff3344','#ff8890','#38c8ff']);
+particles('pS4',70,['#fff','#ff3344']);
+particles('pOut',80,['#fff','#ff3344','#38c8ff']);
+// speed lines
+document.querySelectorAll('.speedlines').forEach(el=>{for(let i=0;i<+el.dataset.n;i++){const l=document.createElement('div');l.className='sl';l.style.cssText=`top:${rnd()*1920}px;width:${300+rnd()*600}px;opacity:${.2+rnd()*.6};animation-duration:${350+rnd()*500}ms;animation-delay:${-rnd()*800}ms`;el.appendChild(l)}});
+// color swatches
+['#f4f4f4','#1a1a1a','#a9adb3','#b0121c','#2b3a67'].forEach((c,i)=>{const d=document.createElement('div');d.style.cssText=`width:110px;height:110px;border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.7),${c} 45%,#000 120%);border:4px solid #fff;box-shadow:0 0 30px rgba(255,255,255,.4);animation:pop 450ms cubic-bezier(.16,1,.3,1) ${8750+i*110}ms both`;document.getElementById('swatches').appendChild(d)});
+// transitions: flashes + light sweeps at cuts
+[[3000,1],[5600,.8],[8000,.8],[10400,.9],[13000,1]].forEach(([t,o])=>{const f=document.createElement('div');f.className='f';f.style.animationDelay=(t-60)+'ms';f.style.setProperty('--o',o);document.getElementById('flashes').appendChild(f);
+ const s=document.createElement('div');s.style.cssText=`position:absolute;top:-400px;left:0;width:260px;height:2800px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.0),rgba(255,60,80,.55),rgba(255,255,255,.9),rgba(255,60,80,.55),transparent);filter:blur(6px);animation:sweep 600ms cubic-bezier(.6,0,.4,1) ${t-300}ms both;opacity:1`;document.getElementById('sweeps').appendChild(s)});
+// render control
+window.setT=ms=>{document.getAnimations().forEach(a=>{a.pause();a.currentTime=ms})};
+window.ready=Promise.all([document.fonts.ready,...[...document.images].map(i=>i.decode())]);
+</script>
+</body></html>
